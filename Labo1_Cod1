@@ -1,0 +1,158 @@
+#define _USE_MATH_DEFINES
+#include <stdlib.h>
+#include <math.h>
+#include <GL/glut.h>
+void circunferencia(int, int, int);
+void init(void);
+void display(void);
+void reshape(int, int);
+void ejes_coordenadas();
+void modelo1(int, int, int);
+
+void drawText(const char* text, float x, float y) {
+    /*Posicionar el raster (posicion 3d en coordenadas de ventana)
+        glRasterPos2f(posicion_x, posicion_y)  */ 
+    glRasterPos2f(x, y); 
+    while (*text) {
+        /* Indica el una caracter de mapa de bits
+            glutBitmapCharacter(fuente_mapa_de_bits, caracter) */
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *text); 
+        text++;
+    }
+}
+
+
+void modelo3(int h, int k, int radio)
+{
+    glBegin(GL_POLYGON);
+    circunferencia(h, k, radio);
+    glEnd();
+}
+
+void modelo2(int h, int k, int radio)
+{
+    glBegin(GL_LINE_LOOP);
+    circunferencia(h, k, radio);
+    glEnd();
+}
+
+void modelo1(int h, int k, int radio)
+{
+    glBegin(GL_POINTS);
+    circunferencia(h, k, radio);
+    glEnd();
+}
+
+void circunferencia(int h, int k, int radio)
+{
+    GLfloat ang, x, y;
+    for (ang = 0.0f; ang < 2 * M_PI; ang += 2 * M_PI / 20)
+    {
+        x = h + radio * cos(ang);
+        y = k + radio * sin(ang);
+        glVertex2f(x, y);
+    }
+}
+
+void ejes_coordenadas()
+{
+    glBegin(GL_LINES);
+        GLfloat x1, y1, x2, y2, x3, y3, x4, y4;
+        x1 = 0;
+        y1 = 9.5;
+        x2 = 0;
+        y2 = -9.5;
+        glVertex2f(x1, y1);
+        glVertex2f(x2, y2);
+
+        x3 = -16;
+        y3 = 0;
+        x4 = 16;
+        y4 = 0;
+        glVertex2f(x3, y3);
+        glVertex2f(x4, y4);
+    glEnd();
+}
+
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(1000, 500);
+    //glutInitWindowPosition(500,500);
+    glutCreateWindow(argv[0]);
+    init();
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutMainLoop();
+    return 0;
+}
+void init(void)
+{
+    glClearColor(1.0, 1.0, 1.0, 0.0);  //parametros: rojo, verde, azul, el cuarto es el parametro alpha
+    glShadeModel(GL_FLAT);
+}
+
+void display(void)
+{
+    GLfloat ang, radio = 8.0f, x, y;
+    glClear(GL_COLOR_BUFFER_BIT);
+    glPushMatrix();
+    glColor3f(0, 0, 1);
+
+    // Ejes coordenadas
+    ejes_coordenadas();
+    drawText("Y", 0.5, 9.2);
+    drawText("X", 15.5, 0.5);
+    
+    // Primera figura
+    glColor3f(1, 0, 0);
+    glPointSize(4);
+    modelo1(-10, 5, 4);
+
+    // Segunda figura
+    modelo2(0, 5, 4);
+
+    // Tercera figura
+    glColor3f(0.32941, 0.87451, 0.17255);
+    glLineWidth(4);
+    modelo2(10, 5, 4);
+
+    // Cuarta figura
+    glColor3f(0, 0, 1);
+    modelo3(-10, -5, 4);
+
+    // Quinta figura
+    glLineStipple(1, 0x0C0F);
+    glLineWidth(1.5);
+    glEnable(GL_LINE_STIPPLE);
+    modelo2(0, -5, 4);
+    glDisable(GL_LINE_STIPPLE);
+
+    // Sexta figura
+    
+    // Contorno
+    glColor3f(0, 0, 1);
+    glLineStipple(1, 0x0C0F);
+    glLineWidth(1.5);
+    glEnable(GL_LINE_STIPPLE);
+    modelo2(10, -5, 4);
+    glDisable(GL_LINE_STIPPLE);
+
+    // Relleno
+    glColor3f(0.32941, 0.87451, 0.17255);
+    modelo3(10, -5, 4);
+    
+    glPopMatrix();      // recupera el estado del matriz
+    glFlush();
+}
+void reshape(int w, int h)
+{
+    glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-20.0, 20.0, -10.0, 10.0, -10.0, 10.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
