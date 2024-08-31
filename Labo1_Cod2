@@ -1,0 +1,94 @@
+#define _USE_MATH_DEFINES
+#include <stdlib.h>
+#include <math.h>
+#include <GL/glut.h>
+
+void init(void);
+void display(void);
+void reshape(int, int);
+
+int main(int argc, char** argv)
+{
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+	glutInitWindowSize(500, 500);
+	glutCreateWindow(argv[0]);
+	init();
+	glutDisplayFunc(display);
+	glutReshapeFunc(reshape);
+	glutMainLoop();
+	return 0;
+}
+
+void init(void)
+{
+	glClearColor(1.0, 1.0, 1.0, 0.0); // parametros: rojo, verde, azul, el cuarto es el parametro alpha
+	glShadeModel(GL_FLAT);
+}
+
+void display(void)
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	glPushMatrix(); // Salva el estado actual de la matriz
+
+	/*GLUquadricObj* pt;
+	pt = gluNewQuadric();
+	// Esta orden especifica como va a ser renderizado
+	gluQuadricDrawStyle(pt, GLU_LINE);
+	glColor3f(0.0, 0.0, 1.0);
+	// Dibujar discos
+	gluDisk(pt, 6, 9, 20, 1);*/
+
+	/* GLUquadricObj* pt;
+	pt = gluNewQuadric();
+	// renderizar con lineas
+	gluQuadricDrawStyle(pt, GLU_LINE);
+	glColor3f(0, 0, 1);
+	gluPartialDisk(pt, 6, 9, 5, 1, 0, 90);
+	*/
+	
+	glColor3f(1, 0, 0);
+	glPointSize(4);
+	glBegin(GL_LINE_LOOP);
+		// Circunferencia que varia entre 0 y 2pi 
+		// Se trabaja con radianes
+		GLint num_vertices;
+		GLfloat radio_menor, radio_mayor, num_divisiones, acumulador;
+		radio_menor = 6;
+		radio_mayor = 9;
+		num_divisiones = 20;
+		acumulador = 0;
+		for (num_vertices = 0; num_vertices < 4*2; num_vertices++)
+		{
+			if(num_vertices == 0)
+			{
+				glVertex2f(0, 0);
+			}
+			else if (num_vertices % 2 == 0)
+			{
+				glVertex2f(radio_mayor * sin(acumulador), radio_mayor * cos(acumulador));
+				acumulador = acumulador + 2 * M_PI / num_divisiones;
+			}
+			else 
+			{
+				if (num_vertices % 2 == 1) {
+					glVertex2f(radio_menor * sin(acumulador), radio_menor * cos(acumulador));
+					acumulador = acumulador + 2 * M_PI / num_divisiones;
+				}
+			}
+			
+		}	
+	glEnd();
+	glPopMatrix(); // Recupera el valor de la matriz
+	glFlush(); // Ejecuta funciones OpenGL en tiempo finito
+}
+
+void reshape(int w, int h)
+{
+	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
